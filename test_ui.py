@@ -1,7 +1,6 @@
 import pytest
 from pages import Chekingattrs
 
-
 class TestMyFunctions:
 
     def test_click(self, browser):

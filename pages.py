@@ -7,7 +7,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 
 
-
 class Chekingattrs(BPage):
 
     def load_hidden_layers(self):

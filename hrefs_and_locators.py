@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
 
-
 class Hrefs:
     HREF_HIDDEN_LAYERS = (By.LINK_TEXT, 'Hidden Layers')
     HREF_LOAD_DELAY = (By.LINK_TEXT, 'Load Delay')
