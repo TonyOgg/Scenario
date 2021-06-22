@@ -1,36 +1,12 @@
 from base import BPage
+from hrefs_and_locators import Hrefs, Locators
 import time
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains as ac
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
-
-class Hrefs:
-    HREF_HIDDEN_LAYERS = (By.LINK_TEXT, 'Hidden Layers')
-    HREF_LOAD_DELAY = (By.LINK_TEXT, 'Load Delay')
-    HREF_AJAX_DATA = (By.LINK_TEXT, 'AJAX Data')
-    # HREF_CLICK_SIDE_DELAY = (By.LINK_TEXT, 'Client Side Delay')
-    HREF_CLICK = (By.LINK_TEXT, 'Click')
-    HREF_TEXT_INPUT = (By.LINK_TEXT, 'Text Input')
-    HREF_SCROLLBARS = (By.LINK_TEXT, 'Scrollbars')
-    HREF_DYNAMIC_TABLE = (By.LINK_TEXT, 'Dynamic Table')
+from selenium.webdriver.common.by import By
 
 
-class Locators:
-    LOCATOR_BUTTON_HIDDEN_LAYERS = (By.XPATH, "/html//button[@id='greenButton']")
-    LOCATOR_BUTTON_LOAD = (By.XPATH, "/html//section//button[@class='btn btn-primary']")
-    LOCATOR_AJAX_BUTTON = (By.XPATH, "/html//button[@id='ajaxButton']")
-    LOCATOR_AJAX_SUCCESS = (By.XPATH, "//div[@id='content']/p[@class='bg-success']")
-    LOCATOR_CLIENT_DELAY_BUTTON = (By.XPATH, "/html//button[@id='ajaxButton']")
-    # LOCATOR_CLICK_SIDE_DELAY = (By.XPATH, "//div[@id='content']/p[@class='bg-success']")
-    LOCATOR_NO_CLICK_BUTTON = (By.XPATH, "/html//button[@id='badButton']")
-    LOCATOR_TEXT_INPUT_FIELD = (By.XPATH, "/html//input[@id='newButtonName']")
-    LOCATOR_TEXT_INPUT_BUTTON = (By.XPATH, "/html//button[@id='updatingButton']")
-    LOCATOR_SCROLLBARS = (By.XPATH, "/html//section/div/div")
-    LOCATOR_BUTTON_IN_SCROLLBAR = (By.XPATH, "/html//button[@id='hidingButton']")
-    LOCATOR_DYNAMIC_TABLE_RESULT = (By.XPATH, "/html//section//p[@class='bg-warning']")
-    LOCATOR_DYNAMIC_TABLE_ALL = (By.XPATH, "//section//div[@role='table']/div[3]")
-    LOCATOR_DYNAMIC_TABLE_HEAD = (By.XPATH, "//section//div[@role='table']/div[2]/div[@role='row']")
 
 class Chekingattrs(BPage):
 
@@ -51,24 +27,53 @@ class Chekingattrs(BPage):
         return 'Success'
 
     def load_ajax_request(self):
-        search_elem = self.find_link(Hrefs.HREF_AJAX_DATA)
-        wait = WebDriverWait(self.driver, 5).until(ec.visibility_of_element_located(Locators.LOCATOR_AJAX_BUTTON))
+        link_to_page = self.find_link(Hrefs.HREF_AJAX_DATA)
+        wait = WebDriverWait(self.driver, 6).until(ec.visibility_of_element_located(Locators.LOCATOR_AJAX_BUTTON))
         search_elem = self.find_element(Locators.LOCATOR_AJAX_BUTTON)
+        time.sleep(1)
         search_elem.click()
         wait = WebDriverWait(self.driver, 16).\
-            until(ec.text_to_be_present_in_element(Locators.LOCATOR_AJAX_SUCCESS,
-                                                   "Data loaded with AJAX get request."))
-
+            until(ec.visibility_of_element_located(Locators.LOCATOR_AJAX_SUCCESS))
+        time.sleep(1)
+        search_elem.click()
+        wait = WebDriverWait(self.driver, 16). \
+            until(ec.presence_of_all_elements_located(Locators.LOCATOR_AJAX_LOAD))
         return wait
 
-    # def load_client_side_delay(self):
-    #     search_elem = self.find_link(Hrefs.HREF_AJAX_DATA)
-    #     search_elem = self.find_element(Locators.LOCATOR_AJAX_BUTTON)
-    #     search_elem.click()
-    #     wait = WebDriverWait(self.driver, 16).\
-    #         until(ec.text_to_be_present_in_element(Locators.LOCATOR_AJAX_SUCCESS,
-    #                                                "Data loaded with AJAX get request."))
-    #     return wait
+    def search_verify_text(self, text):
+        link_to_page = self.find_link(Hrefs.HREF_VERIFY_TEXT)
+        hole_elem = self.find_element(Locators.LOCATOR_VERIFY_TEXT).text
+        user_elem = self.find_element(Locators.LOCATOR_VERIFY_TEXT_USERNAME).text
+        searching_element = hole_elem.split(' ' + user_elem)[0]
+        return searching_element
+
+    def checking_percent(self, percent):
+        link_to_page = self.find_link(Hrefs.HREF_PROGRESS_BAR)
+        w = WebDriverWait(self.driver, 5).until(ec.element_to_be_clickable(Locators.LOCATOR_START_PROGRESS_BAR))
+        start = self.find_element(Locators.LOCATOR_START_PROGRESS_BAR)
+        time.sleep(1)
+        start.click()
+        LOCATOR_STATUS_PROGRESS_BAR = (By.XPATH, "/html//div[@id='progressBar' and @aria-valuenow={0}]".format(percent))
+        wait = WebDriverWait(self.driver, 100).until(ec.presence_of_element_located
+                                                   (LOCATOR_STATUS_PROGRESS_BAR))
+        stop = self.find_element(Locators.LOCATOR_STOP_PROGRESS_BAR)
+        stop.click()
+        return float(wait.text[:-1])
+
+    def load_client_side_delay(self):
+        link_to_page = self.find_link(Hrefs.HREF_CLIENT_SIDE_DELAY)
+        wait = WebDriverWait(self.driver, 6).until(ec.visibility_of_element_located
+                                                   (Locators.LOCATOR_CLICK_CLIENT_SIDE_DELAY))
+        search_elem = self.find_element(Locators.LOCATOR_CLICK_CLIENT_SIDE_DELAY)
+        time.sleep(1)
+        search_elem.click()
+        wait = WebDriverWait(self.driver, 16). \
+            until(ec.visibility_of_element_located(Locators.LOCATOR_CLICK_CLIENT_SIDE_DELAY_SUCCESS))
+        time.sleep(1)
+        search_elem.click()
+        wait = WebDriverWait(self.driver, 16). \
+            until(ec.presence_of_all_elements_located(Locators.LOCATOR_CLICK_CLIENT_SIDE_DELAY_LOAD))
+        return wait
 
     def load_click(self):
         search_elem = self.find_link(Hrefs.HREF_CLICK)
@@ -81,7 +86,9 @@ class Chekingattrs(BPage):
         search_elem = self.find_link(Hrefs.HREF_TEXT_INPUT)
         search_elem = self.find_element(Locators.LOCATOR_TEXT_INPUT_FIELD)
         search_elem.clear()
+        time.sleep(1)
         search_elem.send_keys(text)
+        time.sleep(1)
         click_button = self.find_element(Locators.LOCATOR_TEXT_INPUT_BUTTON)
         time.sleep(1)
         click_button.click()
